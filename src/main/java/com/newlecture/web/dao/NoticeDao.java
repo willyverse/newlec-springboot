@@ -1,7 +1,9 @@
 package com.newlecture.web.dao;
 
 import com.newlecture.web.entity.Notice;
+import com.newlecture.web.entity.NoticeView;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -9,9 +11,9 @@ import java.util.List;
 @Mapper
 public interface NoticeDao {
 
-    @Select("select * from notice")
-    List<Notice> getList();
+    List<NoticeView> getList(int offset, int size, String field, String title);
 
-    @Select("select * from notice where id = ${id}")
-    Notice get(int id);
+    NoticeView get(int id);
+
+    int insert(Notice notice);
 }
