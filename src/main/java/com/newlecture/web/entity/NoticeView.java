@@ -22,4 +22,11 @@ public class NoticeView extends Notice {
         super(id, title, content, regDate, hit, pub, memberId);
         this.memberName = memberName;
     }
+
+    @Override
+    public String toString() {
+        return "NoticeView{" +
+                "memberName='" + memberName + '\'' +
+                '}';
+    }
 }

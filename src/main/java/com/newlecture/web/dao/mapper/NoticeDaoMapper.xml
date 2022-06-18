@@ -3,20 +3,98 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.newlecture.web.dao.NoticeDao">
-    <select id="getList" resultType="com.newlecture.web.entity.NoticeView">
+    <resultMap id="noticeViewMap" type="com.newlecture.web.entity.NoticeView">
+        <result property="memberName" column="MEMBER_NAME" />
+        <result property="memberId" column="MEMBER_ID" />
+    </resultMap>
+    <select id="getViewList" resultMap="noticeViewMap">
         SELECT      *
         FROM
              (
              SELECT     *
              FROM       NOTICE_VIEW
                  )
-        WHERE       ${field} LIKE '%${title}%'
-        AND         ROWNUM BETWEEN #{offset} AND #{size}
+        <where>
+            <if test="query != null and query != ''">
+                  ${field} LIKE '%${query}%'
+            </if>
+            AND         PUB = #{pub}
+            AND         ROWNUM BETWEEN #{offset} AND #{size}
+        </where>
         ORDER BY    REGDATE DESC
     </select>
-
-<!--    <insert id="insert" parameterType="com.newlecture.web.entity.Notice">
-
-    </insert>-->
-
+    <select id="getCount">
+        SELECT      COUNT(ID) COUNT
+        FROM        NOTICE_VIEW
+        WHERE       ${field} LIKE '%${query}%'
+    </select>
+    <select id="getView" parameterType="int" resultType="com.newlecture.web.entity.NoticeView">
+        SELECT      *
+        FROM        NOTICE_VIEW
+        WHERE       ID = #{id}
+    </select>
+    <select id="getNext" parameterType="int" resultType="com.newlecture.web.entity.Notice">
+        <![CDATA[
+        SELECT      *
+        FROM        (
+                        SELECT      *
+                        FROM       NOTICE
+                        WHERE      REGDATE < (
+                            SELECT      REGDATE
+                            FROM        NOTICE
+                            WHERE       ID = #{id}
+                        )
+                        ORDER BY   REGDATE
+                    )
+        WHERE       ROWNUM = 1
+        ]]>
+    </select>
+    <select id="getPrev" parameterType="int" resultType="com.newlecture.web.entity.Notice">
+        <![CDATA[
+        SELECT      *
+        FROM        (
+                        SELECT      *
+                        FROM       NOTICE
+                        WHERE      REGDATE < (
+                            SELECT      REGDATE
+                            FROM        NOTICE
+                            WHERE       ID = #{id}
+                        )
+                        ORDER BY   REGDATE DESC
+                    )
+        WHERE       ROWNUM = 1
+        ]]>
+    </select>
+    <insert id="insert" parameterType="com.newlecture.web.entity.Notice">
+        INSERT INTO NOTICE(TITLE, CONTENT, MEMBER_ID)
+        VALUES (#{id}, #{content}, #{memberId})
+    </insert>
+    <update id="update" parameterType="com.newlecture.web.entity.Notice">
+        UPDATE      NOTICE
+        SET         TITLE = #{title},
+                    CONTENT = #{content},
+                    HIT = #{hit},
+                    PUB = #{pub}
+        WHERE       ID = #{id}
+    </update>
+    <delete id="delete" parameterType="int">
+        DELETE FROM NOTICE
+        WHERE       ID = #{id}
+    </delete>
+    <delete id="deleteAll">
+        DELETE FROM NOTICE
+        WHERE       ID IN
+        <foreach item="item" collection="item" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <update id="updatePubAll">
+        UPDATE      NOTICE
+        SET         PUB = #{pub}
+        WHERE       ID IN (
+            <foreach collection="ids" item="id" separator=",">
+                #{id}
+            </foreach>
+        )
+    </update>
 </mapper>

@@ -24,8 +24,9 @@ public class NoticeController {
         int page = 1;
         String field = "title";
         String query = "";
+        boolean pub = true;
 
-        List<NoticeView> list = service.getList(page, field, query);
+        List<NoticeView> list = service.getViewList(page, field, query, true);
 
         model.addAttribute("list", list);
 
